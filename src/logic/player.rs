@@ -16,3 +16,13 @@ impl std::fmt::Display for Player {
         }
     }
 }
+
+/// Implementation to return the other player.
+impl Player {
+    pub fn other(self) -> Self {
+        match self {
+            Player::X => Player::O,
+            Player::O => Player::X,
+        }
+    }
+}

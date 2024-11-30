@@ -10,7 +10,7 @@ pub mod completions;
 pub mod logic;
 
 /// Publically use functions and enums from app.
-// pub use app::*;
+pub use app::*;
 /// Publically use functions and enums from clap.
 pub use clap::*;
 /// Publically use the run_game function from the run_game module from the cli module.
