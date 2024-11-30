@@ -1,47 +1,6 @@
 use crate::BoardArgs;
-/// Enum to represent player in the game: either X or O.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Player {
-    X,
-    O,
-}
 
-/// Implementation to display player as a string ("X" or "O").
-impl std::fmt::Display for Player {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Player::X => write!(f, "X"),
-            Player::O => write!(f, "O"),
-        }
-    }
-}
-
-/// Holds the state of the game, including the board.
-#[derive(Clone, Debug)]
-pub struct GameState {
-    pub board: Vec<char>,
-    pub current_player: Player,
-    pub game_over: bool,
-}
-
-/// Errors that can occur during game operations.
-#[derive(Debug)]
-enum GameError {
-    InvalidBoardSize,
-    EmptyBoard,
-}
-
-/// Implementation to display message based on error.
-impl std::fmt::Display for GameError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            GameError::InvalidBoardSize => write!(f, "The board size is invalid."),
-            GameError::EmptyBoard => write!(f, "The board is empty."),
-        }
-    }
-}
-
-impl std::error::Error for GameError {}
+use super::{GameError, GameState, GameStatus, Player};
 
 /// Trait for generating and checking the game board.
 pub trait Generate {
@@ -53,9 +12,10 @@ pub trait Generate {
     fn check_winner(
         boardargs: &BoardArgs,
         state: GameState,
-    ) -> Result<Option<char>, Box<dyn std::error::Error>>;
+    ) -> Result<GameStatus, Box<dyn std::error::Error>>;
 }
 
+/// Implementation of 'Generate' for GameState that makes a new GameState, and checks winner based on GameState.
 impl Generate for GameState {
     fn new(boardargs: &BoardArgs) -> Result<Self, Box<dyn std::error::Error>> {
         // Set size of board and handle errors.
@@ -68,14 +28,14 @@ impl Generate for GameState {
         // Return board as an Ok value.
         Ok(GameState {
             board,
-            current_player: Player::X, // Default starting player.
-            game_over: false,          // Default game status.
+            current_player: Player::X,   // Default starting player.
+            status: GameStatus::Ongoing, // Default game status.
         })
     }
     fn check_winner(
         boardargs: &BoardArgs,
         state: Self,
-    ) -> Result<Option<char>, Box<dyn std::error::Error>> {
+    ) -> Result<GameStatus, Box<dyn std::error::Error>> {
         // Get size of board.
         let size: usize = boardargs.size.unwrap();
         // Check if the board is valid size.
@@ -120,18 +80,30 @@ impl Generate for GameState {
             ])
             // Collects the chained iterater into a vector of vectors containing values of usize which holds the winning combinations.
             .collect::<Vec<Vec<usize>>>();
-        // Go through each winning combination to see if given board matches any.
+
+        // Iterates through each combination in winning_combinations (combo is a singular winning combination).
         for combo in winning_combinations {
-            // Gets the value of the player at index 0
+            // combo[0] gets the index of the first element in the winning combination.
+            // board[combo[0]] gets the character at the index of the first element in the winning combination.
             let first: char = board[combo[0]];
-            if first != ' ' // If the first char is not empty
-                && combo // and each value in the winning combinaitons are the first char
+            if first != ' ' // If the first char at the index of the first element in the winning combination is not empty
+                && combo 
                     .iter()
-                    .all(|&position_index: &usize| board[position_index] == first)
+                    .all(|&board_index: &usize| board[board_index] == first) // and if each char in the iterated index in the winning combination has the same value as the first 
             {
-                return Ok(Some(first)); // return the value of the first index as the winner.
+                let winner = match first {
+                    'X' => Player::X,
+                    'O' => Player::O,
+                    _ => unreachable!(),
+                };
+                return Ok(GameStatus::Won(winner)); // return the value of the first index as the winner.
             }
         }
-        Ok(None)
+        // If the board does not contain any white spaces and does not satisfy any of the above return the Ok value as a draw.
+        if !board.contains(&' ') {
+            return Ok(GameStatus::Draw);
+        }
+        // If the current game board does not satisfy any of the above then the game is currently ongoing.
+        Ok(GameStatus::Ongoing)
     }
 }
