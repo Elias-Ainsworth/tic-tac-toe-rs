@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Nix
+      - name: Setup Nix
+        uses: aldoborrero/use-nix-action@v4
+      # Rust
       - name: Setup Rust
         uses: actions/checkout@v2
       - name: Install cargo-audit
