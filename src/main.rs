@@ -1,14 +1,12 @@
 use clap::Parser;
-// use dioxus::{desktop::Config, prelude::LaunchBuilder};
-use tic_tac_toe_rs::{
-    completions, run_game, /* App,*/ BoardArgs, TicTacToeArgs, TicTacToeSubcommand,
-};
+use dioxus::{desktop::Config, prelude::LaunchBuilder};
+use tic_tac_toe_rs::{completions, run_game, App, BoardArgs, TicTacToeArgs, TicTacToeSubcommand};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: TicTacToeArgs = TicTacToeArgs::parse();
     if let Some(app) = args.launch_app {
         match app {
-            /* true => {
+            true => {
                 LaunchBuilder::desktop()
                     .with_cfg(
                         Config::new()
@@ -32,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     )
                     .launch(App);
                 Ok(())
-            } */
+            }
             _ => match args.command.as_ref() {
                 Some(command) => match command {
                     TicTacToeSubcommand::Generate(args) => completions(args),
