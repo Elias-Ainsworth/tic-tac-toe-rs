@@ -13,7 +13,7 @@ pub struct GenerateArgs {
     pub shell: ShellCompletion,
 }
 
-#[derive(Args, Debug, PartialEq, Eq)]
+#[derive(Args, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BoardArgs {
     #[arg(name = "NUMBER", help = "Size of board.", default_value = "3")]
     pub size: Option<usize>,

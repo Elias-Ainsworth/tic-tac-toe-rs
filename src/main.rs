@@ -7,6 +7,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(app) = args.launch_app {
         match app {
             true => {
+                env_logger::init();
                 LaunchBuilder::desktop()
                     .with_cfg(
                         Config::new()
